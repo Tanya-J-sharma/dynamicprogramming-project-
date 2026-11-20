@@ -4,7 +4,6 @@ def solve(instance, seed=42):
     universe = instance["universe"]
     subsets = instance["subsets"]
 
-    # Give every element a position.
     elements = sorted(universe)
 
     position = {
@@ -15,7 +14,6 @@ def solve(instance, seed=42):
     n = len(elements)
     full = (1 << n) - 1
 
-    # Convert subsets into bitmasks.
     masks = []
 
     for subset in subsets:
@@ -26,7 +24,6 @@ def solve(instance, seed=42):
 
         masks.append(mask)
 
-    # Create the DP table.
     INF = float("inf")
     n_states = 1 << n
 
@@ -35,16 +32,13 @@ def solve(instance, seed=42):
     parent_set = [-1] * n_states
     parent_mask = [-1] * n_states
 
-    # Starting point: nothing covered.
     dp[0] = 0
 
-    # Try every possible state.
     for mask in range(n_states):
 
         if dp[mask] == INF:
             continue
 
-        # Try adding every subset.
         for i, subset_mask in enumerate(masks):
 
             new_mask = mask | subset_mask
@@ -56,11 +50,9 @@ def solve(instance, seed=42):
                 parent_set[new_mask] = i
                 parent_mask[new_mask] = mask
 
-    # Check whether a solution exists.
     if dp[full] == INF:
         raise ValueError("No feasible cover")
 
-    # Recover the selected subsets.
     answer = []
     current = full
 
