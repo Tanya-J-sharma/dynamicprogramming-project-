@@ -2,7 +2,6 @@ def solve(instance, seed=42):
     u = instance["universe"]
     subs = instance["subsets"]
     
-    # helper to map things out, maybe unnecessary but whatever
     def _make_pos(elems):
         return {e: idx for idx, e in enumerate(sorted(elems))}
 
@@ -42,7 +41,7 @@ def solve(instance, seed=42):
 
     res = dp(0)
     if res == float("inf"):
-        raise ValueError("No feasible cover") # TODO: handle gracefully later
+        raise ValueError("No feasible cover") 
 
     ans = []
     curr = 0
