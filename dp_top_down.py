@@ -1,79 +1,54 @@
-
 def solve(instance, seed=42):
+    u = instance["universe"]
+    subs = instance["subsets"]
+    
+    # helper to map things out, maybe unnecessary but whatever
+    def _make_pos(elems):
+        return {e: idx for idx, e in enumerate(sorted(elems))}
 
-    universe = instance["universe"]
-    subsets = instance["subsets"]
-
-    elements = sorted(universe)
-
-    position = {
-        element: i
-        for i, element in enumerate(elements)
-    }
-
-    n = len(elements)
+    pos = _make_pos(u)
+    n = len(u)
     full = (1 << n) - 1
 
     masks = []
-
-    for subset in subsets:
-        mask = 0
-
-        for element in subset:
-            mask |= 1 << position[element]
-
-        masks.append(mask)
+    for s in subs:
+        m = 0
+        for elem in s:
+            m |= 1 << pos[elem]
+        masks.append(m)
 
     memo = {}
-    choice = {}
+    track = {}
 
-    def solve_mask(mask):
-
-        if mask == full:
-            return 0
-
-        if mask in memo:
-            return memo[mask]
-
+    def dp(mask):
+        if mask == full: return 0
+        if mask in memo: return memo[mask]
+        
         best = float("inf")
-        best_subset = -1
-
-        for i, subset_mask in enumerate(masks):
-
-            new_mask = mask | subset_mask
-
-            if new_mask == mask:
-                continue
-
-            candidate = 1 + solve_mask(new_mask)
-
-            if candidate < best:
-                best = candidate
-                best_subset = i
+        b_sub = -1
+        
+        for i, sm in enumerate(masks):
+            nm = mask | sm
+            if nm == mask: continue
+            
+            val = 1 + dp(nm)
+            if val < best:
+                best = val
+                b_sub = i
 
         memo[mask] = best
-        choice[mask] = best_subset
-
+        track[mask] = b_sub
         return best
 
-    # STEP 7: Solve the original problem
-    optimum = solve_mask(0)
+    res = dp(0)
+    if res == float("inf"):
+        raise ValueError("No feasible cover") # TODO: handle gracefully later
 
-    # Check whether a cover exists
-    if optimum == float("inf"):
-        raise ValueError("No feasible cover")
+    ans = []
+    curr = 0
+    while curr != full:
+        idx = track[curr]
+        ans.append(idx)
+        curr = curr | masks[idx]
 
-    # STEP 8: Reconstruct the selected subsets
-    answer = []
-    current = 0
-
-    while current != full:
-
-        i = choice[current]
-
-        answer.append(i)
-
-        current = current | masks[i]
-
-    # Return the selected subset indices
-    return answer
+    return ans
